@@ -1,7 +1,12 @@
 module Psub
   module SubscriptionAdapter
     class SubscriberMap
-      def initialize
+
+      attr_reader :logger, :server
+
+      def initialize(server)
+        @server = server
+        @logger = @server.logger
         @subscribers = Hash.new { |h,k| h[k] = [] }
         @sync = Mutex.new
       end
@@ -9,6 +14,8 @@ module Psub
       def add_subscriber(channel, subscriber, on_success)
         @sync.synchronize do
           new_channel = !@subscribers.key?(channel)
+
+          logger.debug "subscriber to be added: #{subscriber}"
 
           @subscribers[channel] << subscriber
 
@@ -22,10 +29,10 @@ module Psub
 
       def remove_subscriber(channel, subscriber)
         @sync.synchronize do
-          puts 'remove_subscriber'
-          puts "#{@subscribers.size}"
+          logger.debug "subscriber to be removed: #{subscriber}"
+          logger.debug "#{channel} count: #{@subscribers[channel].size}"
           @subscribers[channel].delete(subscriber)
-          puts "#{@subscribers.size}"
+          logger.debug "#{channel} count: #{@subscribers[channel].size}"
 
           if @subscribers[channel].empty?
             @subscribers.delete channel

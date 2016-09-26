@@ -53,7 +53,7 @@ module Psub
 
         class Listener < SubscriberMap
           def initialize(adapter, event_loop)
-            super()
+            super(adapter.server)
 
             @adapter = adapter
             @event_loop = event_loop
